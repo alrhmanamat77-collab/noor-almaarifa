@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معمل المحاكاة الافتراضي: أحجام الأجسام وقياساتها | أمة الرحمن الشُعبي</title>
+    <!-- تحميل Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- تحميل خطوط Google العربية: Cairo و Tajawal -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- أيقونات FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- مكتبة Tone.js للمؤثرات الصوتية التفاعلية بدون روابط خارجية -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        tajawal: ['Tajawal', 'sans-serif'],
+                    },
+                    colors: {
+                        skyLab: '#0ea5e9',
+                        tealLab: '#14b8a6',
+                        amberLab: '#f59e0b',
+                        purpleLab: '#8b5cf6',
+                        softBg: '#f0f9ff',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f5f3ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* شريط التمرير المخصص */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 10px;
+            border-radius: 999px;
+            background: #cbd5e1;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #0284c7;
+            cursor: pointer;
+            border: 3px solid #ffffff;
+            box-shadow: 0 3px 8px rgba(2, 132, 199, 0.4);
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        /* حركة الفقاعات في تجربة الكأس المقلوب */
+        @keyframes floatBubble {
+            0% {
+                transform: translateY(0) scale(0.6);
+                opacity: 0.9;
+            }
+            50% {
+                transform: translateY(-60px) translateX(8px) scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-130px) translateX(-6px) scale(1.2);
+                opacity: 0;
+            }
+        }
+        .bubble-anim {
+            animation: floatBubble 1.6s ease-out forwards;
+        }
+
+        /* حركة التحريك/الخلط */
+        @keyframes stirSpoon {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-12px) rotate(-8deg); }
+            75% { transform: translateX(12px) rotate(8deg); }
+        }
+        .stirring {
+            animation: stirSpoon 0.45s ease-in-out infinite;
+        }
+
+        /* انتقالات ناعمة للبطاقات */
+        .tab-panel {
+            animation: fadeInScale 0.35s ease-out;
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* تنسيق الطباعة */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-sky-200 selection:text-sky-900">
+
+    <!-- ======================== 1. الترويسة والهوية القابلة للتعديل ======================== -->
+    <header class="bg-white/90 backdrop-blur-md border-b-4 border-sky-400 shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+                
+                <!-- شعار المعمل وعنوان الدرس -->
+                <div class="flex items-center gap-3 sm:gap-4 text-center sm:text-right">
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-sky-500 via-teal-400 to-purple-500 flex items-center justify-center text-white shadow-lg shrink-0 transform -rotate-3">
+                        <i class="fa-solid fa-flask-vial text-2xl sm:text-3xl"></i>
+                    </div>
+                    <div>
+                        <span class="inline-block px-3 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold mb-1 border border-amber-300">
+                            <i class="fa-solid fa-sparkles ml-1 text-amber-500"></i>
+                            <span id="displayGrade">مادة العلوم • المعمل التفاعلي الشامل</span>
+                        </span>
+                        <h1 id="displayLessonTitle" class="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
+                            معمل المحاكاة الافتراضي: أحجام الأجسام وقياساتها
+                        </h1>
+                    </div>
+                </div>
+
+                <!-- بطاقة المعلمة / المصممة + أزرار التحكم -->
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <!-- بطاقة التعريف البارزة -->
+                    <div class="flex items-center gap-3 bg-gradient-to-l from-purple-50 via-sky-50 to-teal-50 border-2 border-purple-200 px-4 py-2 rounded-2xl shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-sky-500 text-white flex items-center justify-center font-bold shadow">
+                            <i class="fa-solid fa-chalkboard-user text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-bold text-purple-600 leading-none mb-0.5">إعداد وتصميم المعلمة</p>
+                            <p id="displayTeacherName" class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
+                                أمة الرحمن الشُعبي
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- زر تعديل بيانات المعمل -->
+                    <button onclick="openHeaderModal()" class="no-print flex items-center gap-2 bg-amber-400 hover:bg-amber-500 active:scale-95 text-slate-900 font-bold px-4 py-2.5 rounded-2xl shadow-md transition cursor-pointer text-sm">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>تعديل بيانات المعمل</span>
+                    </button>
+
+                    <!-- زر تفعيل الصوت -->
+                    <button id="soundToggleBtn" onclick="toggleSound()" title="تشغيل/كتم المؤثرات الصوتية" class="no-print w-11 h-11 rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-700 flex items-center justify-center font-bold transition cursor-pointer shadow-sm">
+                        <i id="soundIcon" class="fa-solid fa-volume-high text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- شريط التنقل بين التجارب الأربع والملخص -->
+            <nav class="no-print mt-4 pt-3 border-t border-slate-100 flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-1">
+                <button onclick="switchTab('exp1')" id="tab-exp1" class="nav-btn active-tab flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer bg-sky-600 text-white shadow-md">
+                    <i class="fa-solid fa-cube"></i>
+                    <span>1. الأجسام المنتظمة</span>
+                </button>
+                <button onclick="switchTab('exp2')" id="tab-exp2" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer bg-white text-slate-700 hover:bg-teal-50 border border-slate-200">
+                    <i class="fa-solid fa-vial"></i>
+                    <span>2. الإزاحة والمخبار المدرج</span>
+                </button>
+                <button onclick="switchTab('exp3')" id="tab-exp3" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer bg-white text-slate-700 hover:bg-cyan-50 border border-slate-200">
+                    <i class="fa-solid fa-wind"></i>
+                    <span>3. هل الهواء يشغل حيزاً؟</span>
+                </button>
+                <button onclick="switchTab('exp4')" id="tab-exp4" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer bg-white text-slate-700 hover:bg-amber-50 border border-slate-200">
+                    <i class="fa-solid fa-glass-water-droplet"></i>
+                    <span>4. الذوبان في الماء</span>
+                </button>
+                <button onclick="switchTab('summary')" id="tab-summary" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer bg-white text-slate-700 hover:bg-purple-50 border border-slate-200">
+                    <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                    <span>5. تذكّر يا بطل! والتقويم</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ======================== شريط المفاهيم التمهيدية السريع ======================== -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 mt-5">
+        <div class="bg-white/85 backdrop-blur rounded-3xl p-4 sm:p-5 border-2 border-sky-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-start sm:items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-pink-100 text-pink-600 flex items-center justify-center shrink-0 text-xl font-black">
+                    <i class="fa-solid fa-shapes"></i>
+                </div>
+                <div>
+                    <h2 class="text-base sm:text-lg font-extrabold text-pink-700">ما المقصود بالحجم؟</h2>
+                    <p id="displayConceptDef" class="text-sm sm:text-base text-slate-700 font-medium">
+                        هو <span class="text-rose-600 font-extrabold underline decoration-wavy decoration-rose-300">مقدار الحيّز</span> الذي يشغله الجسم من الفراغ (الماء له حجم، الحجر له حجم، والهواء له حجم أيضاً).
+                    </p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs font-bold shrink-0">
+                <span class="px-3 py-1.5 rounded-xl bg-purple-100 text-purple-800 border border-purple-200">
+                    <i class="fa-solid fa-ruler-combined ml-1"></i> وحدات الحجم: م³ (للأحجام الكبيرة)
+                </span>
+                <span class="px-3 py-1.5 rounded-xl bg-teal-100 text-teal-800 border border-teal-200">
+                    <i class="fa-solid fa-droplet ml-1"></i> اللتر (لتر) والمليلتر (مل) للسوائل
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================== المحتوى الرئيسي للتجارب ======================== -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+
+        <!-- ========================================================================= -->
+        <!-- التجربة الأولى: قياس حجم الأجسام المنتظمة (المكعب ومتوازي المستطيلات) -->
+        <!-- ========================================================================= -->
+        <section id="panel-exp1" class="tab-panel">
+            <div class="bg-white rounded-3xl shadow-xl border-2 border-sky-200 overflow-hidden">
+                <!-- ترويسة التجربة -->
+                <div class="bg-gradient-to-l from-sky-600 to-blue-500 text-white p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-bold">التجربة الأولى • الأجسام المنتظمة الشكل</span>
+                        <h2 class="text-xl sm:text-2xl font-black mt-1">قياس حجم المكعب ومتوازي المستطيلات بالأبعاد</h2>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="setRegularPreset(4, 4, 4)" class="px-3 py-2 rounded-xl bg-white text-sky-700 hover:bg-sky-50 font-bold text-xs sm:text-sm shadow cursor-pointer transition">
+                            <i class="fa-solid fa-cube ml-1"></i> مثال مكعب (4×4×4)
+                        </button>
+                        <button onclick="setRegularPreset(6, 3, 2)" class="px-3 py-2 rounded-xl bg-amber-300 text-slate-900 hover:bg-amber-400 font-bold text-xs sm:text-sm shadow cursor-pointer transition">
+                            <i class="fa-solid fa-box ml-1"></i> متوازي مستطيلات (6×3×2)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-5 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <!-- لوحة التحكم بالأبعاد (يمين) -->
+                    <div class="lg:col-span-5 space-y-5 bg-slate-50 p-5 rounded-3xl border border-slate-200">
+                        <h3 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-sky-600"></i>
+                            <span>أدخل أبعاد المجسم بالسنتيمتر (cm):</span>
+                        </h3>
+
+                        <!-- الطول L -->
+                        <div class="bg-white p-4 rounded-2xl border border-sky-100 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="font-bold text-sky-800 flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-black">L</span>
+                                    <span>الطول (Length)</span>
+                                </label>
+                                <div class="flex items-center gap-1">
+                                    <input type="number" id="inputL" min="1" max="10" step="0.5" value="5" oninput="syncRegularFromInput('L')" class="w-16 text-center font-black text-sky-700 bg-sky-50 border border-sky-300 rounded-xl py-1">
+                                    <span class="text-xs font-bold text-slate-500">cm</span>
+                                </div>
+                            </div>
+                            <input type="range" id="sliderL" min="1" max="10" step="0.5" value="5" oninput="syncRegularFromSlider('L')" class="w-full">
+                        </div>
+
+                        <!-- العرض W -->
+                        <div class="bg-white p-4 rounded-2xl border border-teal-100 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="font-bold text-teal-800 flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center font-black">W</span>
+                                    <span>العرض (Width)</span>
+                                </label>
+                                <div class="flex items-center gap-1">
+                                    <input type="number" id="inputW" min="1" max="10" step="0.5" value="4" oninput="syncRegularFromInput('W')" class="w-16 text-center font-black text-teal-700 bg-teal-50 border border-teal-300 rounded-xl py-1">
+                                    <span class="text-xs font-bold text-slate-500">cm</span>
+                                </div>
+                            </div>
+                            <input type="range" id="sliderW" min="1" max="10" step="0.5" value="4" oninput="syncRegularFromSlider('W')" class="w-full">
+                        </div>
+
+                        <!-- الارتفاع H -->
+                        <div class="bg-white p-4 rounded-2xl border border-purple-100 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="font-bold text-purple-800 flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-black">H</span>
+                                    <span>الارتفاع (Height)</span>
+                                </label>
+                                <div class="flex items-center gap-1">
+                                    <input type="number" id="inputH" min="1" max="10" step="0.5" value="3" oninput="syncRegularFromInput('H')" class="w-16 text-center font-black text-purple-700 bg-purple-50 border border-purple-300 rounded-xl py-1">
+                                    <span class="text-xs font-bold text-slate-500">cm</span>
+                                </div>
+                            </div>
+                            <input type="range" id="sliderH" min="1" max="10" step="0.5" value="3" oninput="syncRegularFromSlider('H')" class="w-full">
+                        </div>
+
+                        <!-- خيار إظهار مكعبات الوحدة -->
+                        <label class="flex items-center justify-between bg-amber-50 border border-amber-200 p-3.5 rounded-2xl cursor-pointer">
+                            <span class="font-bold text-amber-900 text-sm">
+                                <i class="fa-solid fa-border-all ml-1.5 text-amber-600"></i>
+                                تقسيم المجسم إلى مكعبات وحدة (1 cm³)
+                            </span>
+                            <input type="checkbox" id="showUnitGrid" checked onchange="drawRegularShape()" class="w-5 h-5 accent-amber-500 rounded cursor-pointer">
+                        </label>
+                    </div>
+
+                    <!-- منطقة الرسم الهندسي ثلاثي الأبعاد والنتائج (يسار) -->
+                    <div class="lg:col-span-7 flex flex-col gap-5">
+                        <!-- لوحة العرض ثلاثي الأبعاد SVG -->
+                        <div class="relative bg-gradient-to-b from-sky-50 to-indigo-50/60 rounded-3xl border-2 border-dashed border-sky-300 p-4 flex flex-col items-center justify-center min-h-[320px]">
+                            <span id="shapeTypeBadge" class="absolute top-4 right-4 px-3.5 py-1.5 rounded-xl bg-white/90 shadow-sm border border-sky-200 text-sky-800 font-extrabold text-sm">
+                                متوازي مستطيلات
+                            </span>
+                            <svg id="regularBoxSvg" viewBox="0 0 460 320" class="w-full max-w-md h-auto drop-shadow-md"></svg>
+                        </div>
+
+                        <!-- بطاقة القانون والحساب اللحظي -->
+                        <div class="bg-gradient-to-l from-sky-50 via-white to-purple-50 rounded-3xl p-5 border-2 border-sky-200 shadow-sm">
+                            <div class="text-center mb-3">
+                                <span class="text-xs font-bold text-slate-500">قانون حساب حجم الجسم المنتظم:</span>
+                                <p class="text-base sm:text-lg font-black text-slate-800 mt-0.5">
+                                    الحجم = الطول (<span class="text-sky-600">L</span>) × العرض (<span class="text-teal-600">W</span>) × الارتفاع (<span class="text-purple-600">H</span>)
+                                </p>
+                            </div>
+
+                            <div class="bg-white rounded-2xl p-4 border border-slate-200 flex flex-col sm:flex-row items-center justify-around gap-4 text-center">
+                                <div>
+                                    <p class="text-xs font-bold text-slate-400">التعويض المباشر</p>
+                                    <p id="regEquationText" class="text-lg sm:text-xl font-black text-slate-800 mt-1" dir="ltr">
+                                        5 × 4 × 3 = 60 cm³
+                                    </p>
+                                </div>
+                                <div class="h-10 w-px bg-slate-200 hidden sm:block"></div>
+                                <div class="flex flex-wrap justify-center gap-3">
+                                    <div class="px-4 py-2 rounded-2xl bg-sky-600 text-white shadow">
+                                        <span class="block text-[11px] opacity-90">الحجم بالسنتيمتر المكعب</span>
+                                        <span id="regVolCm3" class="text-xl font-black">60 cm³</span>
+                                    </div>
+                                    <div class="px-4 py-2 rounded-2xl bg-teal-600 text-white shadow">
+                                        <span class="block text-[11px] opacity-90">يعادل بالمليلتر (ml)</span>
+                                        <span id="regVolMl" class="text-xl font-black">60 ml</span>
+                                    </div>
+                                    <div class="px-4 py-2 rounded-2xl bg-purple-600 text-white shadow">
+                                        <span class="block text-[11px] opacity-90">بالمتر المكعب (m³)</span>
+                                        <span id="regVolM3" class="text-lg font-black" dir="ltr">0.00006 m³</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- التجربة الثانية: قياس حجم جسم غير منتظم (طريقة الإزاحة بالمخبار المدرج) -->
+        <!-- ========================================================================= -->
+        <section id="panel-exp2" class="tab-panel hidden">
+            <div class="bg-white rounded-3xl shadow-xl border-2 border-teal-200 overflow-hidden">
+                <!-- ترويسة التجربة -->
+                <div class="bg-gradient-to-l from-teal-600 to-emerald-500 text-white p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-bold">التجربة الثانية • طريقة الإزاحة بالسائل</span>
+                        <h2 class="text-xl sm:text-2xl font-black mt-1">قياس حجم جسم غير منتظم الشكل بالمخبار المدرج</h2>
+                    </div>
+                    <button onclick="openCustomObjectModal()" class="px-4 py-2.5 rounded-2xl bg-amber-300 hover:bg-amber-400 text-slate-900 font-extrabold text-xs sm:text-sm shadow cursor-pointer transition flex items-center gap-2 self-start sm:self-auto">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>إضافة جسم مخصص للمخبار</span>
+                    </button>
+                </div>
+
+                <div class="p-5 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <!-- أدوات التحكم بالتجربة (يمين) -->
+                    <div class="lg:col-span-5 space-y-5 bg-slate-50 p-5 rounded-3xl border border-slate-200">
+                        
+                        <!-- 1. اختيار السائل في المخبار -->
+                        <div>
+                            <label class="block font-extrabold text-slate-800 mb-2 text-sm">
+                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs ml-1">1</span>
+                                اختر نوع السائل في المخبار المدرج:
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="selectCylinderLiquid('water')" id="btn-liq-water" class="p-3 rounded-2xl border-2 border-sky-500 bg-sky-50 text-sky-900 font-bold text-sm flex items-center justify-center gap-2 cursor-pointer transition shadow-sm">
+                                    <i class="fa-solid fa-droplet text-sky-500 text-lg"></i>
+                                    <span>ماء نقي (Water)</span>
+                                </button>
+                                <button onclick="selectCylinderLiquid('oil')" id="btn-liq-oil" class="p-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-700 hover:border-amber-400 font-bold text-sm flex items-center justify-center gap-2 cursor-pointer transition">
+                                    <i class="fa-solid fa-oil-can text-amber-500 text-lg"></i>
+                                    <span>زيت طعام (Oil)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2. تحديد القراءة الأولى V1 -->
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="font-extrabold text-slate-800 text-sm">
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs ml-1">2</span>
+                                    كمية السائل الابتدائية (القراءة الأولى V₁):
+                                </label>
+                                <span id="v1Label" class="px-3 py-1 rounded-xl bg-teal-100 text-teal-800 font-black text-sm">20 ml</span>
+                            </div>
+                            <input type="range" id="v1Slider" min="10" max="35" step="5" value="20" oninput="updateV1(this.value)" class="w-full">
+                            <div class="flex justify-between text-[11px] font-bold text-slate-400 mt-1">
+                                <span>10 ml</span>
+                                <span>20 ml (مثال الكتاب)</span>
+                                <span>35 ml</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. اختيار الجسم المراد قياس حجمه -->
+                        <div>
+                            <label class="block font-extrabold text-slate-800 mb-2 text-sm">
+                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs ml-1">3</span>
+                                اختر الجسم المراد غمره في المخبار:
+                            </label>
+                            <div id="irregularObjectsGrid" class="grid grid-cols-2 gap-2.5">
+                                <!-- يتم تعبئتها ديناميكياً عبر JS -->
+                            </div>
+                        </div>
+
+                        <!-- 4. أزرار التنفيذ والإعادة -->
+                        <div class="flex gap-3 pt-2">
+                            <button id="dropObjectBtn" onclick="dropObjectInCylinder()" class="flex-1 py-3.5 px-4 rounded-2xl bg-gradient-to-l from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600 text-white font-black text-base shadow-lg active:scale-95 transition cursor-pointer flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-arrow-down-long"></i>
+                                <span>إسقاط الجسم في المخبار</span>
+                            </button>
+                            <button onclick="resetCylinder()" class="py-3.5 px-4 rounded-2xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-sm transition cursor-pointer flex items-center justify-center gap-1" title="إعادة التجربة">
+                                <i class="fa-solid fa-rotate-right"></i>
+                                <span>إعادة</span>
+                            </button>
+                        </div>
+
+                        <!-- تنبيه علمي ذكي (يظهر عند وضع السكر في الماء) -->
+                        <div id="sugarWarningBox" class="hidden bg-amber-50 border-2 border-amber-400 rounded-2xl p-4 text-amber-950 shadow-sm">
+                            <div class="flex items-start gap-3">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-2xl mt-0.5"></i>
+                                <div>
+                                    <h4 class="font-black text-sm text-amber-900">تنبيه علمي ذكي! السكر يذوب في الماء</h4>
+                                    <p class="text-xs font-medium mt-1 leading-relaxed">
+                                        كما تعلمنا في الدرس: السكر يذوب في الماء فتتفتت القطعة ولا نحصل على قراءة دقيقة للإزاحة. 
+                                        <strong>الحل:</strong> اختر <span class="underline font-bold">الزيت</span> بدلاً من الماء لقياس حجم قطع السكر لأن السكر لا يذوب في الزيت!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- رسم المخبار المدرج التفاعلي ولوحة الحسابات (يسار) -->
+                    <div class="lg:col-span-7 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                        <!-- المخبار المدرج SVG -->
+                        <div class="md:col-span-6 bg-gradient-to-b from-slate-50 to-teal-50/50 rounded-3xl border-2 border-teal-200 p-4 flex flex-col items-center justify-center relative">
+                            <span id="cylinderLiquidBadge" class="absolute top-3 right-3 px-3 py-1 rounded-full bg-sky-100 text-sky-800 text-xs font-extrabold border border-sky-200">
+                                السائل: ماء
+                            </span>
+                            <svg id="graduatedCylinderSvg" viewBox="0 0 240 430" class="w-52 sm:w-56 h-auto">
+                                <defs>
+                                    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.65"/>
+                                        <stop offset="30%" stop-color="#e0f2fe" stop-opacity="0.2"/>
+                                        <stop offset="85%" stop-color="#bae6fd" stop-opacity="0.35"/>
+                                        <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+                                    </linearGradient>
+                                    <clipPath id="cylinderInnerClip">
+                                        <rect x="74" y="45" width="92" height="335" rx="6" />
+                                    </clipPath>
+                                </defs>
+
+                                <!-- قاعدة المخبار -->
+                                <path d="M 45 395 L 195 395 L 182 380 L 58 380 Z" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
+                                <rect x="40" y="395" width="160" height="10" rx="5" fill="#64748b"/>
+
+                                <!-- جسم المخبار الخلفي -->
+                                <rect x="72" y="40" width="96" height="342" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="2.5"/>
+                                <!-- فوهة المخبار -->
+                                <path d="M 65 40 Q 72 40 72 48 L 168 48 Q 168 40 175 40 Z" fill="#cbd5e1" stroke="#64748b" stroke-width="2"/>
+
+                                <!-- محتوى المخبار المقصوص داخلياً -->
+                                <g clip-path="url(#cylinderInnerClip)">
+                                    <!-- السائل -->
+                                    <rect id="cylinderLiquidRect" x="74" y="260" width="92" height="120" fill="#38bdf8" fill-opacity="0.75"/>
+                                    <!-- سطح السائل العلوي (Meniscus) -->
+                                    <ellipse id="cylinderMeniscus" cx="120" cy="260" rx="46" ry="5" fill="#7dd3fc" fill-opacity="0.9"/>
+
+                                    <!-- الجسم الساقط داخل المخبار -->
+                                    <g id="cylinderObjectGroup" transform="translate(120, 25)">
+                                        <!-- شكل الحجر الافتراضي -->
+                                        <path id="cylObjShape" d="M -22 8 Q -28 -8 -12 -18 Q 4 -24 18 -14 Q 28 -4 20 12 Q 8 22 -14 18 Z" fill="#64748b" stroke="#334155" stroke-width="2"/>
+                                        <text id="cylObjEmoji" x="0" y="6" text-anchor="middle" font-size="22">🪨</text>
+                                    </g>
+
+                                    <!-- حبيبات ذوبان السكر (تظهر فقط عند ذوبان السكر في الماء) -->
+                                    <g id="dissolveParticles" opacity="0">
+                                        <circle cx="105" cy="340" r="2.5" fill="white"/>
+                                        <circle cx="130" cy="330" r="2" fill="white"/>
+                                        <circle cx="115" cy="315" r="3" fill="white"/>
+                                        <circle cx="135" cy="350" r="2" fill="white"/>
+                                        <circle cx="98" cy="325" r="2" fill="white"/>
+                                    </g>
+                                </g>
+
+                                <!-- تدريجات المخبار (من 0 إلى 50 مل) -->
+                                <g id="cylinderTicks"></g>
+
+                                <!-- طبقة لمعان الزجاج الأمامية -->
+                                <rect x="74" y="42" width="92" height="338" rx="6" fill="url(#glassGrad)" pointer-events="none"/>
+
+                                <!-- مؤشر القراءة الأولى V1 -->
+                                <g id="markerV1" transform="translate(0, 260)">
+                                    <line x1="168" y1="0" x2="185" y2="0" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="3,2"/>
+                                    <rect x="185" y="-12" width="52" height="24" rx="6" fill="#0284c7"/>
+                                    <text id="markerV1Text" x="211" y="4" text-anchor="middle" fill="white" font-size="11" font-weight="bold">20 ml</text>
+                                </g>
+
+                                <!-- مؤشر القراءة الثانية V2 -->
+                                <g id="markerV2" transform="translate(0, 200)" opacity="0">
+                                    <line x1="168" y1="0" x2="185" y2="0" stroke="#e11d48" stroke-width="2.5"/>
+                                    <rect x="185" y="-12" width="52" height="24" rx="6" fill="#e11d48"/>
+                                    <text id="markerV2Text" x="211" y="4" text-anchor="middle" fill="white" font-size="11" font-weight="bold">30 ml</text>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <!-- لوحة خطوات الحساب الأربع (كما في الصورة تماماً) -->
+                        <div class="md:col-span-6 space-y-4">
+                            <div class="bg-amber-50/80 border-2 border-amber-200 rounded-3xl p-4 space-y-3">
+                                <h3 class="font-black text-amber-900 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-list-ol text-amber-600"></i>
+                                    <span>خطوات حساب حجم الجسم بالإزاحة:</span>
+                                </h3>
+
+                                <div class="bg-white p-3 rounded-2xl border border-amber-100 flex items-center justify-between">
+                                    <span class="text-xs sm:text-sm font-bold text-slate-700">1. القراءة الأولى للسائل (V₁):</span>
+                                    <span id="calcV1" class="text-base font-black text-sky-600">20 ml</span>
+                                </div>
+
+                                <div class="bg-white p-3 rounded-2xl border border-amber-100 flex items-center justify-between">
+                                    <span class="text-xs sm:text-sm font-bold text-slate-700">2. القراءة الثانية بعد الغمر (V₂):</span>
+                                    <span id="calcV2" class="text-base font-black text-rose-600">— ml</span>
+                                </div>
+
+                                <div class="bg-gradient-to-l from-teal-600 to-emerald-600 text-white p-4 rounded-2xl shadow-md">
+                                    <p class="text-xs font-bold opacity-90 mb-1">حجم الجسم = القراءة الثانية (V₂) − القراءة الأولى (V₁)</p>
+                                    <p id="calcResultFormula" class="text-lg sm:text-xl font-black text-center bg-white/15 rounded-xl py-2 mt-1">
+                                        بانتظار إسقاط الجسم...
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- بطاقة معلومة الدرس -->
+                            <div class="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-xs sm:text-sm text-purple-950">
+                                <p class="font-extrabold text-purple-800 mb-1">
+                                    <i class="fa-solid fa-lightbulb text-amber-500 ml-1"></i>
+                                    لماذا ارتفع مستوى السائل؟
+                                </p>
+                                <p class="leading-relaxed">
+                                    لأنه <strong>لا يمكن لجسمين أن يشغلا الحيّز نفسه في الوقت نفسه</strong>؛ فعند وضع الحجر داخل الماء يرتفع الماء بمقدار حجم الحجر تماماً.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- التجربة الثالثة: هل الهواء يشغل حيزاً؟ (تجربة الكأس المقلوب) -->
+        <!-- ========================================================================= -->
+        <section id="panel-exp3" class="tab-panel hidden">
+            <div class="bg-white rounded-3xl shadow-xl border-2 border-cyan-200 overflow-hidden">
+                <div class="bg-gradient-to-l from-cyan-600 to-sky-500 text-white p-5 sm:p-6">
+                    <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-bold">التجربة الثالثة • خواص الهواء</span>
+                    <h2 class="text-xl sm:text-2xl font-black mt-1">هل الهواء يشغل حيّزاً؟ (تجربة الكأس المقلوب في الحوض)</h2>
+                </div>
+
+                <div class="p-5 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <!-- أدوات التحكم بالكأس (يمين) -->
+                    <div class="lg:col-span-5 space-y-5 bg-slate-50 p-5 rounded-3xl border border-slate-200">
+                        
+                        <!-- 1. التحكم بعمق غمر الكأس -->
+                        <div class="bg-white p-4 rounded-2xl border border-cyan-100 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="font-extrabold text-cyan-900 text-sm">
+                                    <i class="fa-solid fa-arrows-up-down text-cyan-600 ml-1"></i>
+                                    عمق غمر الكأس في الماء:
+                                </label>
+                                <span id="cupDepthLabel" class="px-3 py-1 rounded-xl bg-cyan-100 text-cyan-800 font-black text-xs">
+                                    مغمور بالكامل (100%)
+                                </span>
+                            </div>
+                            <input type="range" id="cupDepthSlider" min="0" max="100" value="85" oninput="updateInvertedCup()" class="w-full">
+                            <div class="flex justify-between text-[11px] font-bold text-slate-400 mt-1">
+                                <span>خارج الماء</span>
+                                <span>نصف مغمور</span>
+                                <span>مغمور في القاع</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. التحكم بزاوية إمالة الكأس -->
+                        <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="font-extrabold text-amber-900 text-sm">
+                                    <i class="fa-solid fa-rotate text-amber-500 ml-1"></i>
+                                    زاوية إمالة الكأس المقلوب:
+                                </label>
+                                <span id="cupTiltLabel" class="px-3 py-1 rounded-xl bg-amber-100 text-amber-800 font-black text-sm" dir="ltr">
+                                    0° (عمودي)
+                                </span>
+                            </div>
+                            <input type="range" id="cupTiltSlider" min="0" max="45" value="0" oninput="updateInvertedCup()" class="w-full">
+                            <div class="flex justify-between text-[11px] font-bold text-slate-400 mt-1">
+                                <span>0° (عمودي تماماً)</span>
+                                <span>20° (إمالة خفيفة)</span>
+                                <span>45° (إمالة كبيرة)</span>
+                            </div>
+                        </div>
+
+                        <!-- أزرار خطوات التجربة السريعة -->
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <button onclick="setCupScenario(85, 0)" class="p-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow cursor-pointer transition">
+                                1. قلب الكأس عمودياً (0°)
+                            </button>
+                            <button onclick="setCupScenario(85, 35)" class="p-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow cursor-pointer transition">
+                                2. إمالة الكأس وخروج الفقاعات
+                            </button>
+                        </div>
+
+                        <!-- الاستنتاج العلمي اللحظي -->
+                        <div id="airConclusionCard" class="bg-gradient-to-l from-cyan-50 to-sky-50 border-2 border-cyan-300 rounded-2xl p-4">
+                            <h4 class="font-black text-cyan-900 text-sm flex items-center gap-2 mb-1">
+                                <i class="fa-solid fa-magnifying-glass-chart text-cyan-600"></i>
+                                <span>المشاهدة والاستنتاج العلمي:</span>
+                            </h4>
+                            <p id="airObservationText" class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">
+                                نلاحظ أن الماء <strong>لا يدخل</strong> إلى الكأس المقلوب عمودياً؛ لأن <strong>الهواء بداخله يشغل حيّزاً</strong> ويمنع الماء من الدخول.
+                            </p>
+                            <div class="mt-3 pt-2 border-t border-cyan-200 text-center">
+                                <span class="inline-block px-3 py-1 rounded-xl bg-amber-300 text-slate-900 font-black text-xs">
+                                    الاستنتاج: الهواء مادة تشغل حيّزاً من الفراغ رغم أننا لا نراه!
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- حوض الماء والكأس المقلوب التفاعلي SVG (يسار) -->
+                    <div class="lg:col-span-7">
+                        <div class="relative bg-gradient-to-b from-sky-50 via-white to-cyan-50 rounded-3xl border-2 border-cyan-200 p-4 flex flex-col items-center justify-center overflow-hidden">
+                            <svg id="airTankSvg" viewBox="0 0 500 360" class="w-full max-w-lg h-auto">
+                                <!-- الحوض الزجاجي -->
+                                <rect x="50" y="130" width="400" height="200" rx="12" fill="#e0f2fe" fill-opacity="0.45" stroke="#0284c7" stroke-width="4"/>
+                                <!-- الماء داخل الحوض -->
+                                <rect id="tankWaterRect" x="53" y="165" width="394" height="162" rx="8" fill="#38bdf8" fill-opacity="0.55"/>
+                                <!-- خط سطح الماء في الحوض -->
+                                <line id="tankWaterSurface" x1="53" y1="165" x2="447" y2="165" stroke="#0369a1" stroke-width="3"/>
+
+                                <!-- حاوية فقاعات الهواء المتحركة -->
+                                <g id="airBubblesContainer"></g>
+
+                                <!-- الكأس الزجاجي المقلوب (يتحرك ويميل) -->
+                                <g id="invertedCupGroup" transform="translate(250, 220) rotate(0)">
+                                    <!-- الهواء المحبوس داخل الكأس -->
+                                    <rect id="cupTrappedAir" x="-46" y="-85" width="92" height="145" rx="6" fill="#ffffff" fill-opacity="0.75"/>
+                                    <text id="cupAirText" x="0" y="-20" text-anchor="middle" fill="#0369a1" font-size="14" font-weight="900">هواء محبوس</text>
+                                    <text id="cupAirSubText" x="0" y="0" text-anchor="middle" fill="#0284c7" font-size="11" font-weight="bold">(يشغل حيّزاً)</text>
+
+                                    <!-- الماء الذي يدخل الكأس عند إمالته -->
+                                    <rect id="cupEnteredWater" x="-46" y="45" width="92" height="15" fill="#0ea5e9" fill-opacity="0.75"/>
+
+                                    <!-- جدران الكأس المقلوب (الفتحة للأسفل) -->
+                                    <path d="M -48 62 L -48 -82 Q -48 -92 -38 -92 L 38 -92 Q 48 -92 48 -82 L 48 62" fill="none" stroke="#334155" stroke-width="5" stroke-linecap="round"/>
+                                    <!-- انعكاس زجاجي -->
+                                    <line x1="-36" y1="-78" x2="-36" y2="48" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+                                </g>
+
+                                <!-- تسميات توضيحية -->
+                                <text x="80" y="315" fill="#0c4a6e" font-size="13" font-weight="bold">حوض مملوء بالماء</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- التجربة الرابعة: قابلية المواد للذوبان في الماء (مختبر الخلط) -->
+        <!-- ========================================================================= -->
+        <section id="panel-exp4" class="tab-panel hidden">
+            <div class="bg-white rounded-3xl shadow-xl border-2 border-purple-200 overflow-hidden">
+                <div class="bg-gradient-to-l from-purple-600 to-indigo-500 text-white p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-bold">التجربة الرابعة • مختبر الخلط والذوبان</span>
+                        <h2 class="text-xl sm:text-2xl font-black mt-1">هل تذوب جميع المواد في الماء؟</h2>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openAddMaterialModal()" class="px-4 py-2.5 rounded-2xl bg-amber-300 hover:bg-amber-400 text-slate-900 font-extrabold text-xs sm:text-sm shadow cursor-pointer transition flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>إضافة مادة جديدة للاختبار</span>
+                        </button>
+                        <button onclick="resetAllBeakers()" class="px-3.5 py-2.5 rounded-2xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs sm:text-sm cursor-pointer transition">
+                            <i class="fa-solid fa-rotate-right ml-1"></i> إعادة الكؤوس
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-5 sm:p-8 space-y-8">
+                    <!-- شبكة الكؤوس التفاعلية -->
+                    <div id="beakersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <!-- يتم توليد الكؤوس الأربعة (السكر، ملح الطعام، الزيت، الحجر) + أي مادة مضافة عبر JS -->
+                    </div>
+
+                    <!-- جدول تسجيل النتائج التفاعلي (مطابق لجدول الدرس) -->
+                    <div class="bg-purple-50/70 rounded-3xl p-5 border-2 border-purple-200">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                            <h3 class="text-lg font-black text-purple-950 flex items-center gap-2">
+                                <i class="fa-solid fa-table-list text-purple-600"></i>
+                                <span>جدول تسجيل ملاحظات التجربة (سلوك المواد في الماء):</span>
+                            </h3>
+                            <span class="text-xs font-bold text-purple-700 bg-white px-3 py-1 rounded-full border border-purple-200">
+                                يتحدث الجدول تلقائياً عند اختبار كل كأس!
+                            </span>
+                        </div>
+
+                        <div class="overflow-x-auto rounded-2xl border border-purple-200 bg-white shadow-sm">
+                            <table class="w-full text-right border-collapse">
+                                <thead>
+                                    <tr class="bg-purple-600 text-white text-sm">
+                                        <th class="py-3 px-4 font-extrabold">المادة</th>
+                                        <th class="py-3 px-4 font-extrabold">حالة الاختبار</th>
+                                        <th class="py-3 px-4 font-extrabold">سلوكها في الماء</th>
+                                        <th class="py-3 px-4 font-extrabold">التفسير العلمي</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="solubilityTableBody" class="divide-y divide-purple-100 text-sm">
+                                    <!-- يتم تعبئته ديناميكياً -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- القسم الخامس: تذكّر يا بطل! (خلاصة الدرس القابلة للتعديل + تقويم تفاعلي) -->
+        <!-- ========================================================================= -->
+        <section id="panel-summary" class="tab-panel hidden">
+            <div class="space-y-6">
+                <!-- بطاقة خلاصة الدرس الثمانية القابلة للتعديل -->
+                <div class="bg-white rounded-3xl shadow-xl border-2 border-amber-300 overflow-hidden">
+                    <div class="bg-gradient-to-l from-amber-400 via-yellow-400 to-amber-300 text-slate-900 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-white text-amber-500 flex items-center justify-center text-2xl shadow">
+                                <i class="fa-solid fa-lightbulb"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl sm:text-2xl font-black">تذكّر يا بطل! • خلاصة الدرس</h2>
+                                <p class="text-xs sm:text-sm font-bold text-slate-800">يمكنك النقر على أي بطاقة لتعديل نصها أو إضافة نقاط جديدة لطلابك</p>
+                            </div>
+                        </div>
+                        <button onclick="addSummaryPoint()" class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow cursor-pointer transition flex items-center gap-2 self-start sm:self-auto">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>إضافة نقطة ملخص جديدة</span>
+                        </button>
+                    </div>
+
+                    <div id="summaryCardsGrid" class="p-5 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- يتم توليد النقاط الثمانية من الصورة + أي نقاط مضافة -->
+                    </div>
+                </div>
+
+                <!-- قسم التقويم التفاعلي السريع للطلاب (قابل للتعديل) -->
+                <div class="bg-white rounded-3xl shadow-xl border-2 border-sky-200 overflow-hidden">
+                    <div class="bg-gradient-to-l from-sky-600 to-indigo-600 text-white p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-xl font-black flex items-center gap-2">
+                                <i class="fa-solid fa-award text-amber-300"></i>
+                                <span>اختبر معلوماتك مع المعلمة أمة الرحمن الشُعبي</span>
+                            </h3>
+                            <p class="text-xs sm:text-sm opacity-90 mt-0.5">أسئلة تفاعلية مباشرة مع إمكانية إضافة أسئلة جديدة</p>
+                        </div>
+                        <button onclick="openAddQuestionModal()" class="px-4 py-2.5 rounded-2xl bg-amber-300 hover:bg-amber-400 text-slate-900 font-extrabold text-xs sm:text-sm shadow cursor-pointer transition flex items-center gap-2 self-start sm:self-auto">
+                            <i class="fa-solid fa-circle-plus"></i>
+                            <span>إضافة سؤال جديد</span>
+                        </button>
+                    </div>
+
+                    <div id="quizContainer" class="p-5 sm:p-8 space-y-5">
+                        <!-- يتم توليد الأسئلة التفاعلية -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ======================== تذييل الصفحة ======================== -->
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 pb-8 pt-2 text-center">
+        <div class="bg-white/80 backdrop-blur rounded-2xl py-3 px-5 border border-slate-200 inline-flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm font-bold text-slate-600 shadow-sm">
+            <span>معمل المحاكاة الافتراضي التفاعلي لمادة العلوم</span>
+            <span class="text-slate-300">|</span>
+            <span class="text-purple-700 font-black">إعداد وتصميم: <span id="footerTeacherName">أمة الرحمن الشُعبي</span></span>
+            <span class="text-slate-300">|</span>
+            <button onclick="resetAllStoredData()" class="text-rose-600 hover:underline cursor-pointer">
+                <i class="fa-solid fa-arrow-rotate-left ml-1"></i>استعادة الإعدادات الافتراضية
+            </button>
+        </div>
+    </footer>
+
+    <!-- ======================== النوافذ المنبثقة (Modals) للتعديل والإضافة ======================== -->
+    
+    <!-- 1. نافذة تعديل بيانات المعمل والهوية -->
+    <div id="headerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-sky-200 animate-fadeIn">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-nib text-amber-500"></i>
+                    <span>تعديل بيانات المعمل والهوية</span>
+                </h3>
+                <button onclick="closeModal('headerModal')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-4 mt-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">اسم المعلمة / المصممة:</label>
+                    <input type="text" id="editTeacherInput" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-sky-500 outline-none font-bold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">عنوان المعمل / الدرس:</label>
+                    <input type="text" id="editTitleInput" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-sky-500 outline-none font-bold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">الصف الدراسي / اسم المدرسة:</label>
+                    <input type="text" id="editGradeInput" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-sky-500 outline-none font-bold">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="closeModal('headerModal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm cursor-pointer">إلغاء</button>
+                <button onclick="saveHeaderSettings()" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow cursor-pointer">حفظ التعديلات</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. نافذة إضافة جسم مخصص للمخبار المدرج -->
+    <div id="customObjectModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-teal-200">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-shapes text-teal-600"></i>
+                    <span>إضافة جسم غير منتظم مخصص</span>
+                </h3>
+                <button onclick="closeModal('customObjectModal')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-4 mt-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">اسم الجسم:</label>
+                    <input type="text" id="customObjName" placeholder="مثال: خاتم ذهبي أو قطعة بطاطس" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-teal-500 outline-none font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">حجمه الحقيقي (مل):</label>
+                        <input type="number" id="customObjVol" min="2" max="15" value="8" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-teal-500 outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">الرمز التعبيري (Emoji):</label>
+                        <input type="text" id="customObjEmoji" value="🥔" maxlength="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-teal-500 outline-none text-center text-xl">
+                    </div>
+                </div>
+                <label class="flex items-center gap-2 bg-amber-50 p-3 rounded-xl border border-amber-200 cursor-pointer">
+                    <input type="checkbox" id="customObjSoluble" class="w-4 h-4 accent-amber-500">
+                    <span class="text-xs font-bold text-amber-900">هذا الجسم يذوب في الماء (يحتاج للزيت لقياس حجمه)</span>
+                </label>
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="closeModal('customObjectModal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm cursor-pointer">إلغاء</button>
+                <button onclick="saveCustomObject()" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow cursor-pointer">إضافة للمختبر</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. نافذة إضافة مادة جديدة لمختبر الذوبان -->
+    <div id="addMaterialModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-purple-200">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-flask text-purple-600"></i>
+                    <span>إضافة مادة جديدة لمختبر الذوبان</span>
+                </h3>
+                <button onclick="closeModal('addMaterialModal')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-4 mt-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">اسم المادة:</label>
+                    <input type="text" id="newMatName" placeholder="مثال: رمل، عصير ليمون، مسمار حديد..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-purple-500 outline-none font-bold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">سلوكها عند وضعها في الماء:</label>
+                    <select id="newMatBehavior" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-purple-500 outline-none font-bold bg-white">
+                        <option value="dissolves">تذوب في الماء (تختفي وتنتشر)</option>
+                        <option value="floats">لا تذوب في الماء (تطفو على السطح)</option>
+                        <option value="sinks">لا تذوب في الماء (تترسب في القاع)</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">لون المادة:</label>
+                        <input type="color" id="newMatColor" value="#d97706" class="w-full h-11 rounded-xl border border-slate-300 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">أيقونة تعبيرية:</label>
+                        <input type="text" id="newMatEmoji" value="⏳" maxlength="2" class="w-full px-4 py-2 rounded-xl border border-slate-300 text-center text-xl">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="closeModal('addMaterialModal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm cursor-pointer">إلغاء</button>
+                <button onclick="saveNewMaterial()" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow cursor-pointer">إضافة الكأس</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. نافذة إضافة سؤال تقويمي جديد -->
+    <div id="addQuestionModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-indigo-200">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-lg font-black text-slate-900">إضافة سؤال تقويمي جديد</h3>
+                <button onclick="closeModal('addQuestionModal')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-3 mt-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">نص السؤال:</label>
+                    <input type="text" id="newQText" placeholder="اكتب السؤال هنا..." class="w-full px-3.5 py-2 rounded-xl border border-slate-300 font-bold text-sm">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-slate-600">الخيارات (حدد الخيار الصحيح):</label>
+                    <div class="flex items-center gap-2">
+                        <input type="radio" name="correctOpt" value="0" checked class="accent-emerald-600 w-4 h-4">
+                        <input type="text" id="newQOpt0" placeholder="الخيار الأول" class="flex-1 px-3 py-1.5 rounded-xl border border-slate-300 text-sm">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="radio" name="correctOpt" value="1" class="accent-emerald-600 w-4 h-4">
+                        <input type="text" id="newQOpt1" placeholder="الخيار الثاني" class="flex-1 px-3 py-1.5 rounded-xl border border-slate-300 text-sm">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="radio" name="correctOpt" value="2" class="accent-emerald-600 w-4 h-4">
+                        <input type="text" id="newQOpt2" placeholder="الخيار الثالث" class="flex-1 px-3 py-1.5 rounded-xl border border-slate-300 text-sm">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-5">
+                <button onclick="closeModal('addQuestionModal')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm cursor-pointer">إلغاء</button>
+                <button onclick="saveNewQuestion()" class="px-5 py-2 rounded-xl bg-indigo-600 text-white font-bold text-sm shadow cursor-pointer">إضافة السؤال</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- رسالة إشعار عائمة (Toast) بديلة عن alert -->
+    <div id="toastBox" class="fixed bottom-5 left-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-sm font-bold pointer-events-none">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toastMessage">تم الحفظ بنجاح!</span>
+    </div>
+
+    <!-- ======================== المنطق البرمجي التفاعلي (JavaScript) ======================== -->
+    <script>
+        // -------------------- إدارة الصوت عبر Tone.js --------------------
+        let soundEnabled = true;
+        let synth = null;
+
+        function playTone(type) {
+            if (!soundEnabled) return;
+            try {
+                if (!synth) {
+                    synth = new Tone.PolySynth(Tone.Synth).toDestination();
+                    synth.volume.value = -10;
+                }
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                if (type === 'click') synth.triggerAttackRelease("C5", "32n");
+                if (type === 'drop') synth.triggerAttackRelease(["G3", "C4"], "8n");
+                if (type === 'bubble') synth.triggerAttackRelease(["E5", "G5", "B5"], "16n");
+                if (type === 'success') synth.triggerAttackRelease(["C5", "E5", "G5"], "8n");
+                if (type === 'warn') synth.triggerAttackRelease(["F3", "B3"], "8n");
+            } catch (e) {
+                // تجاهل في حال عدم تفاعل المستخدم بعد
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            icon.className = soundEnabled ? 'fa-solid fa-volume-high text-lg' : 'fa-solid fa-volume-xmark text-lg text-rose-500';
+            showToast(soundEnabled ? 'تم تفعيل المؤثرات الصوتية' : 'تم كتم الصوت');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastBox');
+            document.getElementById('toastMessage').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2600);
+        }
+
+        // -------------------- البيانات الافتراضية القابلة للتعديل والحفظ --------------------
+        const defaultData = {
+            teacherName: "أمة الرحمن الشُعبي",
+            lessonTitle: "معمل المحاكاة الافتراضي: أحجام الأجسام وقياساتها",
+            gradeInfo: "مادة العلوم • المعمل التفاعلي الشامل",
+            irregularObjects: [
+                { id: 'stone', name: 'حجر غير منتظم', volume: 10, emoji: '🪨', color: '#64748b', solubleInWater: false },
+                { id: 'sugar', name: 'قطعة سكر', volume: 6, emoji: '🧊', color: '#f8fafc', solubleInWater: true },
+                { id: 'key', name: 'مفتاح معدني', volume: 8, emoji: '🔑', color: '#eab308', solubleInWater: false },
+                { id: 'bolt', name: 'صامولة حديد', volume: 12, emoji: '🔩', color: '#475569', solubleInWater: false }
+            ],
+            materials: [
+                { id: 'sugar_mat', name: 'السكر', emoji: '🍚', color: '#ffffff', behavior: 'dissolves', tested: false, explanation: 'يذوب في الماء وتنتشر جزيئاته بين جزيئات الماء.' },
+                { id: 'salt_mat', name: 'ملح الطعام', emoji: '🧂', color: '#e2e8f0', behavior: 'dissolves', tested: false, explanation: 'يذوب في الماء مكوناً محلولاً ملحياً متجانساً.' },
+                { id: 'oil_mat', name: 'الزيت', emoji: '🫗', color: '#facc15', behavior: 'floats', tested: false, explanation: 'لا يذوب في الماء ويطفو فوق سطحه لأن كثافته أقل.' },
+                { id: 'stone_mat', name: 'الحجر', emoji: '🪨', color: '#64748b', behavior: 'sinks', tested: false, explanation: 'لا يذوب في الماء ويستقر في قاع الكأس.' }
+            ],
+            summaryPoints: [
+                "الحجم: مقدار الحيّز الذي يشغله الجسم من الفراغ.",
+                "جميع الأجسام تشغل حيّزاً من الفراغ، ومنها الهواء.",
+                "الأجسام المنتظمة: يمكن حساب حجمها بضرب أبعادها (الطول × العرض × الارتفاع).",
+                "الأجسام غير المنتظمة: نقيسها بطريقة الإزاحة بالسائل في المخبار المدرج.",
+                "حجم الجسم غير المنتظم = القراءة النهائية (V₂) − القراءة الابتدائية (V₁).",
+                "من وحدات قياس الحجم: المتر المكعب (م³) للأحجام الكبيرة، واللتر والمليلتر للسوائل.",
+                "لا يمكن لجسمين أن يشغلا الحيّز نفسه في الوقت نفسه.",
+                "عند ميل الكأس المقلوب تخرج فقاعات الهواء ويدخل الماء مكانه، ونستخدم الزيت لقياس حجم السكر لأنه يذوب في الماء."
+            ],
+            questions: [
+                {
+                    q: "1. مخبار مدرج به 20 مل من الماء، وضعنا فيه حجراً فارتفع الماء إلى 30 مل، فكم يبلغ حجم الحجر؟",
+                    options: ["50 مل", "10 مل", "20 مل"],
+                    correct: 1
+                },
+                {
+                    q: "2. لماذا نستخدم الزيت بدلاً من الماء لقياس حجم قطع السكر بطريقة الإزاحة؟",
+                    options: ["لأن السكر يذوب في الماء ولا يذوب في الزيت", "لأن الزيت أثقل من الحجر", "لأن السكر يطفو فوق الزيت"],
+                    correct: 0
+                },
+                {
+                    q: "3. ما حجم متوازي مستطيلات طوله 5 سم، وعرضه 3 سم، وارتفاعه 2 سم؟",
+                    options: ["10 سم³", "15 سم³", "30 سم³"],
+                    correct: 2
+                }
+            ]
+        };
+
+        // تحميل البيانات من LocalStorage أو استخدام الافتراضية
+        let appState = JSON.parse(localStorage.getItem('ama_science_lab_v1')) || JSON.parse(JSON.stringify(defaultData));
+
+        function saveState() {
+            localStorage.setItem('ama_science_lab_v1', JSON.stringify(appState));
+        }
+
+        function resetAllStoredData() {
+            localStorage.removeItem('ama_science_lab_v1');
+            appState = JSON.parse(JSON.stringify(defaultData));
+            applyHeaderUI();
+            renderIrregularObjects();
+            renderBeakers();
+            renderSummaryCards();
+            renderQuiz();
+            showToast('تمت استعادة الإعدادات الافتراضية للمعمل');
+        }
+
+        // -------------------- التنقل بين التبويبات --------------------
+        function switchTab(tabId) {
+            playTone('click');
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+            document.getElementById('panel-' + tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer bg-white text-slate-700 hover:bg-sky-50 border border-slate-200";
+            });
+            const activeBtn = document.getElementById('tab-' + tabId);
+            activeBtn.className = "nav-btn active-tab flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer bg-sky-600 text-white shadow-md scale-[1.02]";
+        }
+
+        // -------------------- 1. الترويسة القابلة للتعديل --------------------
+        function applyHeaderUI() {
+            document.getElementById('displayTeacherName').textContent = appState.teacherName;
+            document.getElementById('footerTeacherName').textContent = appState.teacherName;
+            document.getElementById('displayLessonTitle').textContent = appState.lessonTitle;
+            document.getElementById('displayGrade').textContent = appState.gradeInfo;
+        }
+
+        function openHeaderModal() {
+            document.getElementById('editTeacherInput').value = appState.teacherName;
+            document.getElementById('editTitleInput').value = appState.lessonTitle;
+            document.getElementById('editGradeInput').value = appState.gradeInfo;
+            openModal('headerModal');
+        }
+
+        function saveHeaderSettings() {
+            const tName = document.getElementById('editTeacherInput').value.trim();
+            const lTitle = document.getElementById('editTitleInput').value.trim();
+            const gInfo = document.getElementById('editGradeInput').value.trim();
+            if (tName) appState.teacherName = tName;
+            if (lTitle) appState.lessonTitle = lTitle;
+            if (gInfo) appState.gradeInfo = gInfo;
+            saveState();
+            applyHeaderUI();
+            closeModal('headerModal');
+            playTone('success');
+            showToast('تم تحديث بيانات المعمل بنجاح!');
+        }
+
+        function openModal(id) {
+            const m = document.getElementById(id);
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        // -------------------- 2. التجربة الأولى: الأجسام المنتظمة --------------------
+        function syncRegularFromSlider(axis) {
+            const val = document.getElementById('slider' + axis).value;
+            document.getElementById('input' + axis).value = val;
+            drawRegularShape();
+        }
+
+        function syncRegularFromInput(axis) {
+            let val = parseFloat(document.getElementById('input' + axis).value);
+            if (isNaN(val) || val < 1) val = 1;
+            if (val > 10) val = 10;
+            document.getElementById('slider' + axis).value = val;
+            drawRegularShape();
+        }
+
+        function setRegularPreset(l, w, h) {
+            playTone('click');
+            document.getElementById('sliderL').value = l;
+            document.getElementById('inputL').value = l;
+            document.getElementById('sliderW').value = w;
+            document.getElementById('inputW').value = w;
+            document.getElementById('sliderH').value = h;
+            document.getElementById('inputH').value = h;
+            drawRegularShape();
+        }
+
+        function drawRegularShape() {
+            const L = parseFloat(document.getElementById('sliderL').value);
+            const W = parseFloat(document.getElementById('sliderW').value);
+            const H = parseFloat(document.getElementById('sliderH').value);
+            const showGrid = document.getElementById('showUnitGrid').checked;
+
+            // حساب الحجم
+            const volCm3 = +(L * W * H).toFixed(2);
+            const volM3 = (volCm3 / 1000000).toFixed(6);
+
+            document.getElementById('regEquationText').textContent = `${L} × ${W} × ${H} = ${volCm3} cm³`;
+            document.getElementById('regVolCm3').textContent = `${volCm3} cm³`;
+            document.getElementById('regVolMl').textContent = `${volCm3} ml`;
+            document.getElementById('regVolM3').textContent = `${volM3} m³`;
+
+            const badge = document.getElementById('shapeTypeBadge');
+            if (L === W && W === H) {
+                badge.textContent = `مكعب منتظم (${L}×${W}×${H})`;
+                badge.className = "absolute top-4 right-4 px-3.5 py-1.5 rounded-xl bg-purple-100 shadow-sm border border-purple-300 text-purple-900 font-extrabold text-sm";
+            } else {
+                badge.textContent = `متوازي مستطيلات (${L}×${W}×${H})`;
+                badge.className = "absolute top-4 right-4 px-3.5 py-1.5 rounded-xl bg-sky-100 shadow-sm border border-sky-300 text-sky-900 font-extrabold text-sm";
+            }
+
+            // رسم المنظور الهندسي الأيزومتري في SVG
+            const svg = document.getElementById('regularBoxSvg');
+            const unit = 17; // مقياس الرسم بالبكسل
+            const lPx = L * unit;
+            const wPx = W * unit * 0.65;
+            const hPx = H * unit;
+
+            // نقطة الأصل السفلية الأمامية للمجسم
+            const originX = 210 - (lPx - wPx) / 2;
+            const originY = 265;
+
+            // زوايا الوجه الأمامي
+            const p0 = { x: originX, y: originY }; // أسفل يسار
+            const p1 = { x: originX + lPx, y: originY }; // أسفل يمين
+            const p2 = { x: originX + lPx, y: originY - hPx }; // أعلى يمين
+            const p3 = { x: originX, y: originY - hPx }; // أعلى يسار
+
+            // إزاحة العمق (العرض W) بزاوية 35 درجة
+            const dx = wPx * 0.85;
+            const dy = -wPx * 0.55;
+
+            const p1b = { x: p1.x + dx, y: p1.y + dy };
+            const p2b = { x: p2.x + dx, y: p2.y + dy };
+            const p3b = { x: p3.x + dx, y: p3.y + dy };
+
+            let gridLines = '';
+            if (showGrid) {
+                // خطوط الطول L على الوجه الأمامي والعلوي
+                for (let i = 1; i < L; i++) {
+                    const xOff = i * unit;
+                    gridLines += `<line x1="${p0.x + xOff}" y1="${p0.y}" x2="${p3.x + xOff}" y2="${p3.y}" stroke="#ffffff" stroke-opacity="0.45" stroke-width="1"/>`;
+                    gridLines += `<line x1="${p3.x + xOff}" y1="${p3.y}" x2="${p3b.x + xOff}" y2="${p3b.y}" stroke="#ffffff" stroke-opacity="0.45" stroke-width="1"/>`;
+                }
+                // خطوط الارتفاع H على الوجه الأمامي والجانبي
+                for (let j = 1; j < H; j++) {
+                    const yOff = j * unit;
+                    gridLines += `<line x1="${p0.x}" y1="${p0.y - yOff}" x2="${p1.x}" y2="${p1.y - yOff}" stroke="#ffffff" stroke-opacity="0.45" stroke-width="1"/>`;
+                    gridLines += `<line x1="${p1.x}" y1="${p1.y - yOff}" x2="${p1b.x}" y2="${p1b.y - yOff}" stroke="#ffffff" stroke-opacity="0.45" stroke-width="1"/>`;
+                }
+                // خطوط العرض W على الوجه العلوي والجانبي
+                for (let k = 1; k < W; k++) {
+                    const ratio = k / W;
+                    const gx = dx * ratio;
+                    const gy = dy * ratio;
+                    gridLines += `<line x1="${p3.x + gx}" y1="${p3.y + gy}" x2="${p2.x + gx}" y2="${p2.y + gy}" stroke="#ffffff" stroke-opacity="0.45" stroke-width="1"/>`;
+                    gridLines += `<line x1="${p1.x + gx}" y1="${p1.y + gy}" x2="${p2.x + gx}" y2="${p2.y + gy}" stroke="#ffffff" stroke-opacity="0.45" stroke-width="1"/>`;
+                }
+            }
+
+            svg.innerHTML = `
+                <!-- ظل أسفل المجسم -->
+                <polygon points="${p0.x+5},${p0.y+8} ${p1.x+5},${p1.y+8} ${p1b.x+8},${p1b.y+8} ${p0.x+dx},${p0.y+dy+8}" fill="#0284c7" fill-opacity="0.12"/>
+                
+                <!-- الوجه العلوي -->
+                <polygon points="${p3.x},${p3.y} ${p2.x},${p2.y} ${p2b.x},${p2b.y} ${p3b.x},${p3b.y}" fill="#38bdf8" stroke="#0369a1" stroke-width="2" stroke-linejoin="round"/>
+                
+                <!-- الوجه الجانبي الأيمن -->
+                <polygon points="${p1.x},${p1.y} ${p1b.x},${p1b.y} ${p2b.x},${p2b.y} ${p2.x},${p2.y}" fill="#0284c7" stroke="#0369a1" stroke-width="2" stroke-linejoin="round"/>
+                
+                <!-- الوجه الأمامي -->
+                <polygon points="${p0.x},${p0.y} ${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y}" fill="#0ea5e9" stroke="#0369a1" stroke-width="2" stroke-linejoin="round"/>
+
+                <!-- شبكة مكعبات الوحدة -->
+                ${gridLines}
+
+                <!-- تسميات الأبعاد -->
+                <text x="${(p0.x + p1.x)/2}" y="${p0.y + 22}" text-anchor="middle" fill="#0369a1" font-size="13" font-weight="900">الطول L = ${L} cm</text>
+                <text x="${p0.x - 12}" y="${(p0.y + p3.y)/2}" text-anchor="end" fill="#7e22ce" font-size="13" font-weight="900">H = ${H} cm</text>
+                <text x="${(p1.x + p1b.x)/2 + 12}" y="${(p1.y + p1b.y)/2 + 14}" text-anchor="start" fill="#0f766e" font-size="13" font-weight="900">W = ${W} cm</text>
+            `;
+        }
+
+        // -------------------- 3. التجربة الثانية: المخبار المدرج والإزاحة --------------------
+        let cylState = {
+            liquid: 'water', // 'water' or 'oil'
+            v1: 20,
+            selectedObjId: 'stone',
+            isDropped: false
+        };
+
+        function initCylinderTicks() {
+            const ticksGroup = document.getElementById('cylinderTicks');
+            let html = '';
+            // المخبار من 0 إلى 50 مل: y=375 هو 0 مل، y=65 هو 50 مل (كل 1 مل = 6.2 بكسل)
+            for (let ml = 5; ml <= 50; ml += 5) {
+                const y = 375 - (ml * 6.2);
+                const isMajor = ml % 10 === 0;
+                const lineW = isMajor ? 22 : 12;
+                html += `<line x1="76" y1="${y}" x2="${76 + lineW}" y2="${y}" stroke="#334155" stroke-width="${isMajor ? 2 : 1.2}"/>`;
+                if (isMajor) {
+                    html += `<text x="103" y="${y + 4}" fill="#1e293b" font-size="11" font-weight="bold">${ml}</text>`;
+                }
+            }
+            ticksGroup.innerHTML = html;
+        }
+
+        function renderIrregularObjects() {
+            const grid = document.getElementById('irregularObjectsGrid');
+            grid.innerHTML = appState.irregularObjects.map(obj => {
+                const isSelected = cylState.selectedObjId === obj.id;
+                return `
+                    <button onclick="selectIrregularObject('${obj.id}')" class="p-3 rounded-2xl border-2 text-right transition cursor-pointer flex items-center gap-2.5 ${isSelected ? 'border-teal-600 bg-teal-50 shadow-sm' : 'border-slate-200 bg-white hover:border-teal-300'}">
+                        <span class="text-2xl">${obj.emoji}</span>
+                        <div class="overflow-hidden">
+                            <p class="font-extrabold text-xs sm:text-sm text-slate-800 truncate">${obj.name}</p>
+                            <p class="text-[11px] font-bold text-teal-700">الحجم: ${obj.volume} ml</p>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectCylinderLiquid(liq) {
+            playTone('click');
+            cylState.liquid = liq;
+            const btnW = document.getElementById('btn-liq-water');
+            const btnO = document.getElementById('btn-liq-oil');
+            const badge = document.getElementById('cylinderLiquidBadge');
+            const liqRect = document.getElementById('cylinderLiquidRect');
+            const meniscus = document.getElementById('cylinderMeniscus');
+
+            if (liq === 'water') {
+                btnW.className = "p-3 rounded-2xl border-2 border-sky-500 bg-sky-50 text-sky-900 font-bold text-sm flex items-center justify-center gap-2 cursor-pointer transition shadow-sm";
+                btnO.className = "p-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-700 hover:border-amber-400 font-bold text-sm flex items-center justify-center gap-2 cursor-pointer transition";
+                badge.textContent = "السائل: ماء نقي";
+                badge.className = "absolute top-3 right-3 px-3 py-1 rounded-full bg-sky-100 text-sky-800 text-xs font-extrabold border border-sky-200";
+                liqRect.setAttribute('fill', '#38bdf8');
+                meniscus.setAttribute('fill', '#7dd3fc');
+            } else {
+                btnO.className = "p-3 rounded-2xl border-2 border-amber-500 bg-amber-50 text-amber-900 font-bold text-sm flex items-center justify-center gap-2 cursor-pointer transition shadow-sm";
+                btnW.className = "p-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-700 hover:border-sky-400 font-bold text-sm flex items-center justify-center gap-2 cursor-pointer transition";
+                badge.textContent = "السائل: زيت طعام";
+                badge.className = "absolute top-3 right-3 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-extrabold border border-amber-300";
+                liqRect.setAttribute('fill', '#facc15');
+                meniscus.setAttribute('fill', '#fef08a');
+            }
+            resetCylinder();
+        }
+
+        function updateV1(val) {
+            cylState.v1 = parseInt(val);
+            document.getElementById('v1Label').textContent = `${cylState.v1} ml`;
+            resetCylinder();
+        }
+
+        function selectIrregularObject(id) {
+            playTone('click');
+            cylState.selectedObjId = id;
+            renderIrregularObjects();
+            resetCylinder();
+        }
+
+        function resetCylinder() {
+            cylState.isDropped = false;
+            const obj = appState.irregularObjects.find(o => o.id === cylState.selectedObjId) || appState.irregularObjects[0];
+            
+            // تحديث مظهر الجسم المعلق أعلى المخبار
+            const objGroup = document.getElementById('cylinderObjectGroup');
+            objGroup.style.transition = 'none';
+            objGroup.setAttribute('transform', 'translate(120, 22) scale(1)');
+            objGroup.style.opacity = '1';
+            document.getElementById('cylObjEmoji').textContent = obj.emoji;
+            document.getElementById('cylObjShape').setAttribute('fill', obj.color);
+
+            // إخفاء حبيبات الذوبان
+            document.getElementById('dissolveParticles').setAttribute('opacity', '0');
+            document.getElementById('sugarWarningBox').classList.add('hidden');
+
+            // ضبط ارتفاع السائل على V1
+            const yV1 = 375 - (cylState.v1 * 6.2);
+            const heightV1 = 380 - yV1;
+            const liqRect = document.getElementById('cylinderLiquidRect');
+            const meniscus = document.getElementById('cylinderMeniscus');
+            liqRect.style.transition = 'all 0.3s ease';
+            meniscus.style.transition = 'all 0.3s ease';
+            liqRect.setAttribute('y', yV1);
+            liqRect.setAttribute('height', heightV1);
+            meniscus.setAttribute('cy', yV1);
+
+            // مؤشرات القراءة
+            const m1 = document.getElementById('markerV1');
+            m1.setAttribute('transform', `translate(0, ${yV1})`);
+            document.getElementById('markerV1Text').textContent = `${cylState.v1} ml`;
+
+            document.getElementById('markerV2').setAttribute('opacity', '0');
+
+            // تحديث لوحة الحسابات
+            document.getElementById('calcV1').textContent = `${cylState.v1} ml`;
+            document.getElementById('calcV2').textContent = `— ml`;
+            document.getElementById('calcResultFormula').textContent = `اضغط على "إسقاط الجسم في المخبار"`;
+        }
+
+        function dropObjectInCylinder() {
+            if (cylState.isDropped) {
+                resetCylinder();
+                setTimeout(dropObjectInCylinder, 120);
+                return;
+            }
+            cylState.isDropped = true;
+            const obj = appState.irregularObjects.find(o => o.id === cylState.selectedObjId) || appState.irregularObjects[0];
+            const objGroup = document.getElementById('cylinderObjectGroup');
+
+            playTone('drop');
+            objGroup.style.transition = 'transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease';
+            objGroup.setAttribute('transform', 'translate(120, 355) scale(1)');
+
+            // التحقق: هل الجسم يذوب في الماء والسائل هو الماء؟
+            if (obj.solubleInWater && cylState.liquid === 'water') {
+                setTimeout(() => {
+                    playTone('warn');
+                    objGroup.style.opacity = '0.15';
+                    objGroup.setAttribute('transform', 'translate(120, 355) scale(0.3)');
+                    document.getElementById('dissolveParticles').setAttribute('opacity', '1');
+                    document.getElementById('sugarWarningBox').classList.remove('hidden');
+
+                    document.getElementById('calcV2').textContent = `غير دقيق (ذاب!)`;
+                    document.getElementById('calcResultFormula').textContent = `ذابت قطعة السكر في الماء! جرّب الزيت`;
+                }, 650);
+                return;
+            }
+
+            // حساب القراءة الثانية V2 ورفع السائل
+            const v2 = cylState.v1 + obj.volume;
+            const yV2 = 375 - (v2 * 6.2);
+            const heightV2 = 380 - yV2;
+
+            setTimeout(() => {
+                playTone('success');
+                const liqRect = document.getElementById('cylinderLiquidRect');
+                const meniscus = document.getElementById('cylinderMeniscus');
+                liqRect.style.transition = 'all 0.6s ease-out';
+                meniscus.style.transition = 'all 0.6s ease-out';
+                liqRect.setAttribute('y', yV2);
+                liqRect.setAttribute('height', heightV2);
+                meniscus.setAttribute('cy', yV2);
+
+                const m2 = document.getElementById('markerV2');
+                m2.setAttribute('transform', `translate(0, ${yV2})`);
+                m2.setAttribute('opacity', '1');
+                document.getElementById('markerV2Text').textContent = `${v2} ml`;
+
+                document.getElementById('calcV2').textContent = `${v2} ml`;
+                document.getElementById('calcResultFormula').textContent = `${v2} − ${cylState.v1} = ${obj.volume} مل (cm³)`;
+            }, 350);
+        }
+
+        function openCustomObjectModal() {
+            openModal('customObjectModal');
+        }
+
+        function saveCustomObject() {
+            const name = document.getElementById('customObjName').value.trim();
+            const vol = parseInt(document.getElementById('customObjVol').value);
+            const emoji = document.getElementById('customObjEmoji').value.trim() || '📦';
+            const soluble = document.getElementById('customObjSoluble').checked;
+
+            if (!name || isNaN(vol) || vol < 1) {
+                showToast('يرجى إدخال اسم الجسم وحجمه بشكل صحيح');
+                return;
+            }
+            const newId = 'custom_' + Date.now();
+            appState.irregularObjects.push({
+                id: newId,
+                name: name,
+                volume: Math.min(vol, 15),
+                emoji: emoji,
+                color: '#8b5cf6',
+                solubleInWater: soluble
+            });
+            saveState();
+            cylState.selectedObjId = newId;
+            renderIrregularObjects();
+            resetCylinder();
+            closeModal('customObjectModal');
+            playTone('success');
+            showToast(`تمت إضافة "${name}" إلى المخبار!`);
+        }
+
+        // -------------------- 4. التجربة الثالثة: الكأس المقلوب والهواء --------------------
+        let lastBubbleTime = 0;
+
+        function setCupScenario(depth, tilt) {
+            document.getElementById('cupDepthSlider').value = depth;
+            document.getElementById('cupTiltSlider').value = tilt;
+            updateInvertedCup();
+        }
+
+        function updateInvertedCup() {
+            const depth = parseInt(document.getElementById('cupDepthSlider').value); // 0 to 100
+            const tilt = parseInt(document.getElementById('cupTiltSlider').value);   // 0 to 45
+
+            document.getElementById('cupDepthLabel').textContent = depth === 0 ? 'خارج الماء (0%)' : `مغمور (${depth}%)`;
+            document.getElementById('cupTiltLabel').textContent = tilt === 0 ? '0° (عمودي)' : `${tilt}° (مائل)`;
+
+            // موضع الكأس العمودي: من y=110 (فوق الماء) إلى y=235 (داخل الحوض)
+            const cupY = 110 + (depth / 100) * 125;
+            const cupGroup = document.getElementById('invertedCupGroup');
+            cupGroup.setAttribute('transform', `translate(250, ${cupY}) rotate(${-tilt})`);
+
+            // ارتفاع الماء في الحوض يرتفع قليلاً عند غمر الكأس
+            const waterRise = (depth / 100) * 12;
+            const surfaceY = 165 - waterRise;
+            document.getElementById('tankWaterRect').setAttribute('y', surfaceY);
+            document.getElementById('tankWaterRect').setAttribute('height', 327 - surfaceY);
+            document.getElementById('tankWaterSurface').setAttribute('y1', surfaceY);
+            document.getElementById('tankWaterSurface').setAttribute('y2', surfaceY);
+
+            const obsText = document.getElementById('airObservationText');
+            const cupWater = document.getElementById('cupEnteredWater');
+            const cupAirText = document.getElementById('cupAirText');
+            const cupAirSub = document.getElementById('cupAirSubText');
+
+            if (depth < 25) {
+                cupWater.setAttribute('y', 60);
+                cupWater.setAttribute('height', 0);
+                cupAirText.textContent = "هواء داخل الكأس";
+                cupAirSub.textContent = "(الكأس خارج الماء)";
+                obsText.innerHTML = "الكأس الآن خارج الماء وهو مملوء بالهواء. جرّب زيادة <strong>عمق الغمر</strong> لإنزاله عمودياً في الحوض.";
+            } else if (tilt < 10) {
+                // الكأس عمودي ومغمور: الهواء يمنع الماء من الدخول (عدا ضغط بسيط جداً)
+                cupWater.setAttribute('y', 50);
+                cupWater.setAttribute('height', 10);
+                cupAirText.textContent = "هواء محبوس";
+                cupAirSub.textContent = "(يمنع دخول الماء)";
+                obsText.innerHTML = "نلاحظ أن الماء <strong>لا يدخل</strong> إلى الكأس المقلوب عمودياً؛ لأن <strong>الهواء بداخله يشغل حيّزاً</strong> ويمنع الماء من الدخول.";
+            } else {
+                // الكأس مائل ومغمور: تخرج فقاعات الهواء ويدخل الماء مكانه
+                const waterFillRatio = Math.min(1, (tilt - 8) / 37);
+                const enteredH = 15 + waterFillRatio * 115;
+                cupWater.setAttribute('y', 60 - enteredH);
+                cupWater.setAttribute('height', enteredH);
+
+                if (tilt >= 35) {
+                    cupAirText.textContent = "خرج معظم الهواء";
+                    cupAirSub.textContent = "(ودخل الماء مكانه)";
+                } else {
+                    cupAirText.textContent = "هواء متبقٍ";
+                    cupAirSub.textContent = "(تخرج الفقاعات)";
+                }
+
+                obsText.innerHTML = "عند <strong>إمالة الكأس</strong> نلاحظ خروج <strong>فقاعات الهواء</strong> للأعلى ودخول الماء داخل الكأس ليحل محل الهواء الذي خرج!";
+
+                // توليد فقاعات هواء متحركة
+                const now = Date.now();
+                if (now - lastBubbleTime > 260) {
+                    lastBubbleTime = now;
+                    spawnAirBubble(215, cupY + 35);
+                    playTone('bubble');
+                }
+            }
+        }
+
+        function spawnAirBubble(x, y) {
+            const container = document.getElementById('airBubblesContainer');
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            const r = 4 + Math.random() * 5;
+            const offsetX = (Math.random() - 0.5) * 20;
+            circle.setAttribute("cx", x + offsetX);
+            circle.setAttribute("cy", y);
+            circle.setAttribute("r", r);
+            circle.setAttribute("fill", "#ffffff");
+            circle.setAttribute("fill-opacity", "0.85");
+            circle.setAttribute("stroke", "#0284c7");
+            circle.setAttribute("stroke-width", "1.5");
+            circle.classList.add("bubble-anim");
+            container.appendChild(circle);
+
+            setTimeout(() => {
+                if (circle.parentNode) circle.parentNode.removeChild(circle);
+            }, 1600);
+        }
+
+        // -------------------- 5. التجربة الرابعة: مختبر الذوبان في الماء --------------------
+        function renderBeakers() {
+            const grid = document.getElementById('beakersGrid');
+            grid.innerHTML = appState.materials.map((mat, idx) => {
+                let statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-bold">لم يُختبر بعد</span>`;
+                let visualContent = '';
+
+                if (!mat.tested) {
+                    // حبيبات أو قطعة أعلى الكأس قبل الإضافة
+                    visualContent = `
+                        <g transform="translate(80, 28)">
+                            <rect x="-18" y="-12" width="36" height="22" rx="6" fill="${mat.color}" stroke="#475569" stroke-width="1.5"/>
+                            <text x="0" y="5" text-anchor="middle" font-size="14">${mat.emoji}</text>
+                        </g>
+                    `;
+                } else {
+                    if (mat.behavior === 'dissolves') {
+                        statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">يذوب في الماء ✓</span>`;
+                        visualContent = `
+                            <circle cx="55" cy="110" r="2" fill="white" opacity="0.6"/>
+                            <circle cx="95" cy="125" r="2" fill="white" opacity="0.6"/>
+                            <circle cx="75" cy="95" r="2" fill="white" opacity="0.6"/>
+                            <text x="80" y="115" text-anchor="middle" fill="#0369a1" font-size="11" font-weight="bold">ذابت المادة تماماً</text>
+                        `;
+                    } else if (mat.behavior === 'floats') {
+                        statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-extrabold">لا يذوب (يطفو) ✗</span>`;
+                        visualContent = `
+                            <rect x="36" y="72" width="88" height="16" fill="${mat.color}" fill-opacity="0.9"/>
+                            <text x="80" y="84" text-anchor="middle" fill="#713f12" font-size="10" font-weight="bold">طبقة طافية</text>
+                        `;
+                    } else {
+                        statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[11px] font-extrabold">لا يذوب (يترسب) ✗</span>`;
+                        visualContent = `
+                            <path d="M 60 154 Q 55 140 70 135 Q 85 130 98 140 Q 105 150 92 156 Z" fill="${mat.color}" stroke="#334155" stroke-width="1.5"/>
+                            <text x="80" y="149" text-anchor="middle" font-size="13">${mat.emoji}</text>
+                        `;
+                    }
+                }
+
+                return `
+                    <div class="bg-slate-50 rounded-3xl p-4 border-2 ${mat.tested ? 'border-purple-300 bg-purple-50/30' : 'border-slate-200'} flex flex-col items-center justify-between transition shadow-sm">
+                        <div class="w-full flex items-center justify-between mb-2">
+                            <span class="font-black text-base text-slate-800 flex items-center gap-1.5">
+                                <span>${mat.emoji}</span>
+                                <span>${mat.name}</span>
+                            </span>
+                            ${statusBadge}
+                        </div>
+
+                        <!-- رسم الكأس الزجاجي SVG -->
+                        <svg viewBox="0 0 160 175" class="w-36 h-40 my-1">
+                            <!-- الماء في الكأس -->
+                            <rect x="36" y="75" width="88" height="82" rx="4" fill="#38bdf8" fill-opacity="${mat.tested && mat.behavior === 'dissolves' ? '0.65' : '0.45'}"/>
+                            
+                            <!-- محتوى المادة -->
+                            ${visualContent}
+
+                            <!-- ملعقة التحريك (تظهر عند النقر) -->
+                            <g id="spoon-${mat.id}" opacity="0">
+                                <line x1="95" y1="20" x2="75" y2="145" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+                            </g>
+
+                            <!-- جدران الكأس -->
+                            <path d="M 32 45 L 35 154 Q 35 160 42 160 L 118 160 Q 125 160 125 154 L 128 45" fill="none" stroke="#475569" stroke-width="3.5" stroke-linecap="round"/>
+                        </svg>
+
+                        <button onclick="testMaterialInWater(${idx})" class="w-full mt-2 py-2.5 px-3 rounded-2xl ${mat.tested ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-purple-600 hover:bg-purple-700 text-white shadow'} font-bold text-xs sm:text-sm transition cursor-pointer flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-spoon"></i>
+                            <span>${mat.tested ? 'إعادة التحريك' : 'أضف إلى الماء وحرّك'}</span>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            renderSolubilityTable();
+        }
+
+        function testMaterialInWater(idx) {
+            playTone('drop');
+            const mat = appState.materials[idx];
+            const spoon = document.getElementById('spoon-' + mat.id);
+            if (spoon) {
+                spoon.setAttribute('opacity', '1');
+                spoon.classList.add('stirring');
+            }
+            setTimeout(() => {
+                mat.tested = true;
+                saveState();
+                playTone(mat.behavior === 'dissolves' ? 'success' : 'click');
+                renderBeakers();
+            }, 650);
+        }
+
+        function resetAllBeakers() {
+            playTone('click');
+            appState.materials.forEach(m => m.tested = false);
+            saveState();
+            renderBeakers();
+            showToast('تم تفريغ وإعادة تجهيز جميع الكؤوس');
+        }
+
+        function renderSolubilityTable() {
+            const tbody = document.getElementById('solubilityTableBody');
+            tbody.innerHTML = appState.materials.map(mat => {
+                let behaviorText = '<span class="text-slate-400">اضغط "أضف إلى الماء وحرّك" أعلاه</span>';
+                if (mat.tested) {
+                    if (mat.behavior === 'dissolves') {
+                        behaviorText = '<span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-extrabold">يذوب في الماء</span>';
+                    } else if (mat.behavior === 'floats') {
+                        behaviorText = '<span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-extrabold">لا يذوب في الماء (يطفو)</span>';
+                    } else {
+                        behaviorText = '<span class="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-800 font-extrabold">لا يذوب في الماء (يترسب)</span>';
+                    }
+                }
+                return `
+                    <tr class="hover:bg-purple-50/50 transition">
+                        <td class="py-3 px-4 font-extrabold text-slate-800">${mat.emoji} ${mat.name}</td>
+                        <td class="py-3 px-4">${mat.tested ? '<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check-circle ml-1"></i>تم الاختبار</span>' : '<span class="text-amber-600 font-bold">بانتظار التجربة</span>'}</td>
+                        <td class="py-3 px-4">${behaviorText}</td>
+                        <td class="py-3 px-4 text-slate-600 text-xs sm:text-sm">${mat.tested ? mat.explanation : '—'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openAddMaterialModal() {
+            openModal('addMaterialModal');
+        }
+
+        function saveNewMaterial() {
+            const name = document.getElementById('newMatName').value.trim();
+            const behavior = document.getElementById('newMatBehavior').value;
+            const color = document.getElementById('newMatColor').value;
+            const emoji = document.getElementById('newMatEmoji').value.trim() || '🧪';
+
+            if (!name) {
+                showToast('يرجى إدخال اسم المادة');
+                return;
+            }
+            const explanations = {
+                dissolves: 'تذوب في الماء وتختفي جزيئاتها داخل السائل.',
+                floats: 'لا تذوب في الماء وتطفو فوق السطح.',
+                sinks: 'لا تذوب في الماء وتترسب في قاع الكأس.'
+            };
+            appState.materials.push({
+                id: 'mat_' + Date.now(),
+                name,
+                emoji,
+                color,
+                behavior,
+                tested: false,
+                explanation: explanations[behavior]
+            });
+            saveState();
+            renderBeakers();
+            closeModal('addMaterialModal');
+            playTone('success');
+            showToast(`تمت إضافة "${name}" إلى مختبر الذوبان`);
+        }
+
+        // -------------------- 6. قسم تذكّر يا بطل والتقويم القابل للتعديل --------------------
+        function renderSummaryCards() {
+            const grid = document.getElementById('summaryCardsGrid');
+            grid.innerHTML = appState.summaryPoints.map((text, index) => `
+                <div class="group bg-amber-50/70 hover:bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 flex items-start justify-between gap-3 transition">
+                    <div class="flex items-start gap-3 flex-1">
+                        <span class="w-8 h-8 rounded-xl bg-purple-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-sm">
+                            ${index + 1}
+                        </span>
+                        <p contenteditable="true" onblur="updateSummaryPoint(${index}, this.innerText)" class="text-sm sm:text-base font-bold text-slate-800 leading-relaxed outline-none focus:bg-white focus:px-2 focus:rounded-lg w-full">
+                            ${text}
+                        </p>
+                    </div>
+                    <button onclick="deleteSummaryPoint(${index})" title="حذف النقطة" class="opacity-40 group-hover:opacity-100 text-rose-500 hover:text-rose-700 p-1 cursor-pointer transition">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function updateSummaryPoint(idx, newText) {
+            const trimmed = newText.trim();
+            if (trimmed) {
+                appState.summaryPoints[idx] = trimmed;
+                saveState();
+                showToast('تم حفظ تعديل الملخص');
+            }
+        }
+
+        function addSummaryPoint() {
+            appState.summaryPoints.push("معلومة إضافية جديدة من المعلمة: انقر هنا لتعديل النص...");
+            saveState();
+            renderSummaryCards();
+            playTone('click');
+        }
+
+        function deleteSummaryPoint(idx) {
+            if (appState.summaryPoints.length <= 1) return;
+            appState.summaryPoints.splice(idx, 1);
+            saveState();
+            renderSummaryCards();
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = appState.questions.map((item, qIdx) => `
+                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                    <div class="flex items-start justify-between gap-2 mb-3">
+                        <h4 class="font-extrabold text-slate-900 text-base">${item.q}</h4>
+                        <button onclick="deleteQuestion(${qIdx})" class="text-slate-400 hover:text-rose-500 text-xs cursor-pointer" title="حذف السؤال">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        ${item.options.map((opt, oIdx) => `
+                            <button onclick="checkQuizAnswer(${qIdx}, ${oIdx}, this)" class="q-opt-${qIdx} p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-sky-400 font-bold text-sm text-slate-700 transition cursor-pointer text-center">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <p id="q-feedback-${qIdx}" class="mt-2.5 text-xs font-extrabold hidden"></p>
+                </div>
+            `).join('');
+        }
+
+        function checkQuizAnswer(qIdx, oIdx, btnEl) {
+            const item = appState.questions[qIdx];
+            const feedback = document.getElementById(`q-feedback-${qIdx}`);
+            document.querySelectorAll(`.q-opt-${qIdx}`).forEach(b => {
+                b.className = `q-opt-${qIdx} p-3 rounded-xl border-2 border-slate-200 bg-white font-bold text-sm text-slate-700 transition cursor-pointer text-center`;
+            });
+
+            feedback.classList.remove('hidden');
+            if (oIdx === item.correct) {
+                playTone('success');
+                btnEl.className = `q-opt-${qIdx} p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-black text-sm shadow-sm text-center`;
+                feedback.className = "mt-2.5 text-xs font-extrabold text-emerald-700";
+                feedback.innerHTML = `<i class="fa-solid fa-star text-amber-500 ml-1"></i> أحسنت يا بطل! إجابة صحيحة وممتازة.`;
+            } else {
+                playTone('warn');
+                btnEl.className = `q-opt-${qIdx} p-3 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-900 font-bold text-sm text-center`;
+                feedback.className = "mt-2.5 text-xs font-extrabold text-rose-600";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark ml-1"></i> حاول مرة أخرى! راجع التجربة واستنتج الإجابة الصحيحة.`;
+            }
+        }
+
+        function openAddQuestionModal() {
+            openModal('addQuestionModal');
+        }
+
+        function saveNewQuestion() {
+            const qText = document.getElementById('newQText').value.trim();
+            const opt0 = document.getElementById('newQOpt0').value.trim();
+            const opt1 = document.getElementById('newQOpt1').value.trim();
+            const opt2 = document.getElementById('newQOpt2').value.trim();
+            const correct = parseInt(document.querySelector('input[name="correctOpt"]:checked').value);
+
+            if (!qText || !opt0 || !opt1 || !opt2) {
+                showToast('يرجى تعبئة نص السؤال وجميع الخيارات الثلاثة');
+                return;
+            }
+            appState.questions.push({
+                q: `${appState.questions.length + 1}. ${qText}`,
+                options: [opt0, opt1, opt2],
+                correct
+            });
+            saveState();
+            renderQuiz();
+            closeModal('addQuestionModal');
+            playTone('success');
+            showToast('تمت إضافة السؤال بنجاح!');
+        }
+
+        function deleteQuestion(idx) {
+            appState.questions.splice(idx, 1);
+            saveState();
+            renderQuiz();
+        }
+
+        // -------------------- تهيئة المعمل عند تحميل الصفحة --------------------
+        window.onload = function() {
+            applyHeaderUI();
+            drawRegularShape();
+            initCylinderTicks();
+            renderIrregularObjects();
+            resetCylinder();
+            updateInvertedCup();
+            renderBeakers();
+            renderSummaryCards();
+            renderQuiz();
+        };
+    </script>
+</body>
+</html>
